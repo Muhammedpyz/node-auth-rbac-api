@@ -65,8 +65,8 @@ A production-ready, high-security Authentication and Role-Based Access Control (
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/level2-auth-api.git
-    cd level2-auth-api
+    git clone https://github.com/Muhammedpyz/node-auth-rbac-api.git
+    cd node-auth-rbac-api
     ```
 
 2.  **Install dependencies:**
