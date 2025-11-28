@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Console</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #eab308;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 1rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            color: white;
+            box-sizing: border-box;
+            /* Fix padding issue */
+        }
+
+        input:focus {
+            outline: 2px solid var(--accent);
+            border-color: transparent;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: #334155;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #16a34a;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: black;
+        }
+
+        .btn-warning:hover {
+            background-color: #ca8a04;
+        }
+
+        #console-output {
+            grid-column: 1 / -1;
+            background-color: #000;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid #334155;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+        }
+
+        .log-success {
+            color: var(--success);
+        }
+
+        .log-error {
+            color: var(--error);
+        }
+
+        .log-info {
+            color: var(--accent);
+        }
+
+        .token-display {
+            word-break: break-all;
+            font-size: 0.8rem;
+            color: var(--warning);
+            background: rgba(234, 179, 8, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .role-USER {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .role-ADMIN {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .role-MODERATOR {
+            background-color: #eab308;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ API Debug Console</h1>
+            <p style="color: var(--text-secondary);">Auth & RBAC Testing Environment</p>
+        </div>
+
+        <!-- Register Card -->
+        <div class="card">
+            <h2>📝 Register</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="reg-email" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="reg-password" value="password123">
+            </div>
+            <button onclick="register()">Register User</button>
+        </div>
+
+        <!-- Verify Email Card -->
+        <div class="card">
+            <h2>✅ Verify Email</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="verify-email" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label>Verification Code</label>
+                <input type="text" id="verify-code" placeholder="123456">
+            </div>
+            <button onclick="verifyEmail()" class="btn-warning">Verify Account</button>
+        </div>
+
+        <!-- Forgot Password Card -->
+        <div class="card">
+            <h2>❓ Forgot Password</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="forgot-email" placeholder="user@example.com">
+            </div>
+            <button onclick="forgotPassword()" class="btn-warning">Send Reset Link</button>
+        </div>
+
+        <!-- Reset Password Card -->
+        <div class="card">
+            <h2>🔐 Reset Password</h2>
+            <div class="form-group">
+                <label>Reset Token</label>
+                <input type="text" id="reset-token" placeholder="Paste token here">
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="reset-new-password" placeholder="New Password">
+            </div>
+            <button onclick="resetPassword()" class="btn-warning">Reset Password</button>
+        </div>
+
+        <!-- Login Card -->
+        <div class="card">
+            <h2>🔑 Login</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" value="password123">
+            </div>
+            <button onclick="login()" class="btn-success">Login & Get Token</button>
+
+            <div id="current-token" class="token-display"></div>
+        </div>
+
+        <!-- RBAC Testing Card -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>🛡️ Role Based Access Control (RBAC) Tests</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Click these buttons to test endpoints protected by different roles.
+                <br>You must be logged in first.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                <button onclick="testEndpoint('/api/auth/me', 'GET')" class="btn-secondary">
+                    👤 Get My Profile (Auth Required)
+                </button>
+                <button onclick="testEndpoint('/api/admin/dashboard', 'GET')" class="btn-warning">
+                    👮 Admin Dashboard (Admin Only)
+                </button>
+                <button onclick="testEndpoint('/api/moderator/panel', 'GET')" class="btn-secondary"
+                    style="background-color: #a855f7;">
+                    🛡️ Moderator Panel (Mod Only)
+                </button>
+                <button onclick="testEndpoint('/api/public/hello', 'GET')" class="btn-secondary"
+                    style="background-color: #64748b;">
+                    🌍 Public Route (No Auth)
+                </button>
+            </div>
+        </div>
+
+        <!-- Console Output -->
+        <div id="console-output">
+            <div class="log-entry log-info">> Ready to debug...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let authToken = null;
+
+        function log(message, type = 'info') {
+            const consoleDiv = document.getElementById('console-output');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+
+            consoleDiv.insertBefore(entry, consoleDiv.firstChild);
+        }
+
+        async function register() {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                log(`Registering user: ${email}...`);
+                const res = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    log(`✅ Success: ${data.message}`, 'success');
+                    // Auto-fill login
+                    document.getElementById('login-email').value = email;
+                } else {
+                    log(`❌ Error: ${data.message}`, 'error');
+                }
+            } catch (err) {
+                log(`❌ Network Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function verifyEmail() {
+            const email = document.getElementById('verify-email').value;
+            const code = document.getElementById('verify-code').value;
+
+            try {
+                log(`Verifying email: ${email} with code ${code}...`);
+                const res = await fetch(`${API_URL}/auth/verify-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    log(`✅ Verified: ${data.message}`, 'success');
+                } else {
+                    log(`❌ Verification Failed: ${data.message}`, 'error');
+                }
+            } catch (err) {
+                log(`❌ Network Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function forgotPassword() {
+            const email = document.getElementById('forgot-email').value;
+            try {
+                log(`Requesting password reset for: ${email}...`);
+                const res = await fetch(`${API_URL}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (res.ok) log(`✅ ${data.message}`, 'success');
+                else log(`❌ Error: ${data.message}`, 'error');
+            } catch (err) {
+                log(`❌ Network Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function resetPassword() {
+            const token = document.getElementById('reset-token').value;
+            const newPassword = document.getElementById('reset-new-password').value;
+            try {
+                log(`Resetting password...`);
+                const res = await fetch(`${API_URL}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, newPassword })
+                });
+                const data = await res.json();
+                if (res.ok) log(`✅ ${data.message}`, 'success');
+                else log(`❌ Error: ${data.message}`, 'error');
+            } catch (err) {
+                log(`❌ Network Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                log(`Logging in as: ${email}...`);
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    authToken = data.accessToken; // Assuming response structure
+                    log(`✅ Login Successful! User ID: ${data.userId}`, 'success');
+
+                    const tokenDisplay = document.getElementById('current-token');
+                    tokenDisplay.style.display = 'block';
+                    tokenDisplay.textContent = `Token: ${authToken.substring(0, 50)}...`;
+                } else {
+                    log(`❌ Login Failed: ${data.message}`, 'error');
+                }
+            } catch (err) {
+                // For now, since login endpoint isn't implemented, this might fail
+                log(`⚠️ Login endpoint might not be ready yet. (${err.message})`, 'warning');
+            }
+        }
+
+        async function testEndpoint(endpoint, method) {
+            if (!authToken && endpoint !== '/api/public/hello') {
+                log('⚠️ Please login first to get a token.', 'warning');
+                return;
+            }
+
+            try {
+                log(`Testing ${method} ${endpoint}...`);
+                const res = await fetch(`http://localhost:3000${endpoint}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    log(`✅ Access Granted: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    if (res.status === 403) log(`⛔ Access Denied (403): You don't have permission.`, 'error');
+                    else if (res.status === 401) log(`⛔ Unauthorized (401): Invalid or missing token.`, 'error');
+                    else log(`❌ Error (${res.status}): ${data.message || res.statusText}`, 'error');
+                }
+            } catch (err) {
+                log(`❌ Request Failed: ${err.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>
