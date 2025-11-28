@@ -1,4 +1,4 @@
-# 🛡️ Level 2 Auth System - Advanced Authentication & RBAC API
+# 🛡️ Advanced Authentication & RBAC API
 
 A production-ready, high-security Authentication and Role-Based Access Control (RBAC) API built with **Node.js**, **Express**, and **Prisma (MySQL)**.
 
